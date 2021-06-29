@@ -3,7 +3,7 @@
 #include <string.h>
 #include <getopt.h>
 
-#include "str_vec.c"
+#include "str_list.c"
 
 char* str_slice(char* buffer, size_t start, size_t length) {
   char* str = malloc(sizeof(char) * length + 1);
@@ -48,8 +48,8 @@ void skip_back(long lines_to_skip, FILE* fh_in, FILE* fh_out) {
   char read_buffer[BUFFER_SIZE];
   size_t bytes_read = BUFFER_SIZE;
 
-  str_vec_t* line_buffers[lines_to_skip];
-  for (int j=0; j<lines_to_skip; j++) line_buffers[j] = str_vec_new();
+  str_list_t* line_buffers[lines_to_skip];
+  for (int j=0; j<lines_to_skip; j++) line_buffers[j] = str_list_new();
 
   int lines_found = 0;
   int lb_i = 0;
@@ -67,14 +67,14 @@ void skip_back(long lines_to_skip, FILE* fh_in, FILE* fh_out) {
 
         if (is_first_element) {
           if (lines_found >= lines_to_skip) {
-            str_vec_flush(line_buffers[lb_i], fh_out);
+            str_list_flush(line_buffers[lb_i], fh_out);
           }
         }
         is_first_element = 0;
 
         int line_length = i - line_start + 1;
         char* str = str_slice(read_buffer, line_start, line_length);
-        str_vec_push(line_buffers[lb_i], str);
+        str_list_push(line_buffers[lb_i], str);
 
         line_start = i + 1;
 
