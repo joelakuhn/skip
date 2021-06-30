@@ -23,6 +23,8 @@ str_list_t* str_list_new() {
 void str_list_push(str_list_t* str_list, char* str) {
     str_list_node_t* new_node = malloc(sizeof(str_list_node_t));
     new_node->str = str;
+    new_node->next = NULL;
+
     if (str_list->last == NULL) {
         str_list->first = new_node;
         str_list->last = new_node;
