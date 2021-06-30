@@ -15,6 +15,6 @@ install: skip
 	cp skip /usr/local/bin/
 
 clean:
-  rm skip
+	rm skip
 
 .BOGUS:
