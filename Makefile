@@ -1,4 +1,4 @@
-CCFLAGS = -Werror
+CCFLAGS = -Werror -std=c99
 CCSOURCES = skip.c
 
 all: skip
