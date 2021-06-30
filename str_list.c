@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef struct _str_list_node_t str_list_node_t;
-typedef struct _str_list_node_t {
+typedef struct str_list_node_t {
     char* str;
-    str_list_node_t* next;
+    struct str_list_node_t* next;
 } str_list_node_t;
 
 typedef struct {
