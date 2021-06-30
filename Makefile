@@ -1,5 +1,5 @@
 CCFLAGS = -Werror -std=c99
-CCSOURCES = skip.c
+CCSOURCES = skip.c 
 
 all: skip
 
@@ -13,5 +13,8 @@ skip:
 
 install: skip
 	cp skip /usr/local/bin/
+
+clean:
+  rm skip
 
 .BOGUS:
