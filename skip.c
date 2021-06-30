@@ -48,6 +48,17 @@ void str_list_flush(str_list_t* str_list, FILE* fh) {
     str_list->last = NULL;
 }
 
+void str_list_destroy(str_list_t* str_list) {
+    str_list_node_t* curr = str_list->first;
+    while (curr != NULL) {
+        str_list_node_t* next = curr->next;
+        free(curr->str);
+        free(curr);
+        curr = next;
+    }
+    free(str_list);
+}
+
 
 char* str_slice(char* buffer, size_t start, size_t length) {
   char* str = malloc(sizeof(char) * length + 1);
@@ -130,7 +141,7 @@ void skip_back(long lines_to_skip, FILE* fh_in, FILE* fh_out) {
     }
   }
 
-  for (int j=0; j<lines_to_skip; j++) free(line_buffers[j]);
+  for (int j=0; j<lines_to_skip; j++) str_list_destroy(line_buffers[j]);
 }
 
 void print_help() {
