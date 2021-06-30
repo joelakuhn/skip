@@ -129,6 +129,8 @@ void skip_back(long lines_to_skip, FILE* fh_in, FILE* fh_out) {
       }
     }
   }
+
+  for (int j=0; j<lines_to_skip; j++) free(line_buffers[j]);
 }
 
 void print_help() {
