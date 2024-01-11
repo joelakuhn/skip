@@ -144,17 +144,29 @@ void skip_back(long lines_to_skip, FILE* fh_in, FILE* fh_out) {
   for (int j=0; j<lines_to_skip; j++) str_list_destroy(line_buffers[j]);
 }
 
+void dump_to_end(FILE* fh_in, FILE* fh_out) {
+  size_t BUFFER_SIZE = 65536;
+  char read_buffer[BUFFER_SIZE];
+
+  while (!feof(fh_in)) {
+    size_t bytes_read = fread(read_buffer, 1, BUFFER_SIZE, fh_in);
+    fwrite(read_buffer, 1, bytes_read, fh_out);
+  }
+}
+
 void print_help() {
   puts("usage: skip [options] [file ...]");
   puts("    -n NUMBER, --number NUMBER        number of lines to skip");
   puts("    -o FILE, --output FILE            path to output file");
   puts("    -b, --back                        skip lines from the back of the file");
+  puts("    -c, --char                        skip bytes instead of lines");
   puts("    -h, --help                        print help");
 }
 
 int main(int argc, char** argv) {
   long lines_to_skip = 10;
   int from_back = 0;
+  int character_mode = 0;
   FILE* fh_in = stdin;
   FILE* fh_out = stdout;
 
@@ -166,7 +178,7 @@ int main(int argc, char** argv) {
 
   while (1) {
     int option_index = 0;
-    int c = getopt_long(argc, argv, "n:o:hb", long_options, &option_index);
+    int c = getopt_long(argc, argv, "n:o:hbc", long_options, &option_index);
     char *_tail;
 
     if (c == -1) break;
@@ -185,35 +197,69 @@ int main(int argc, char** argv) {
     case 'b':
       from_back = 1;
       break;
+    case 'c':
+      character_mode = 1;
+      break;
     case 'h':
       print_help();
       return 0;
     }
   }
 
-  if (optind < argc) {
-    int i;
-    for (i = optind; i < argc; i++) {
-      if (strcmp(argv[i], "-") == 0) {
-        fh_in = stdin;
-      }
-      else {
-        fh_in = fopen(argv[i], "rb");
-        if (fh_in == NULL) {
-          fprintf(stderr, "Can't read file: %s\n", argv[i]);
-          return 1;
+  if (character_mode) {
+    if (optind < argc) {
+      for (int i = optind; i < argc; i++) {
+        if (strcmp(argv[i], "-") == 0) {
+          fh_in = stdin;
         }
-      }
+        else {
+          fh_in = fopen(argv[i], "rb");
+          if (fh_in == NULL) {
+            fprintf(stderr, "Can't read file: %s\n", argv[i]);
+            return 1;
+          }
+        }
 
+        if (from_back) {
+          fseek(fh_in, lines_to_skip, SEEK_END);
+        }
+        else {
+          fseek(fh_in, lines_to_skip, SEEK_SET);
+        }
+        dump_to_end(fh_in, fh_out);
+        fclose(fh_in);
+      }
+    }
+    else {
+      printf("Can't read from stdin in character mode\n");
+    }
+  }
+
+  else {
+    if (optind < argc) {
+      int i;
+      for (i = optind; i < argc; i++) {
+        if (strcmp(argv[i], "-") == 0) {
+          fh_in = stdin;
+        }
+        else {
+          fh_in = fopen(argv[i], "rb");
+          if (fh_in == NULL) {
+            fprintf(stderr, "Can't read file: %s\n", argv[i]);
+            return 1;
+          }
+        }
+
+        if (from_back) skip_back(lines_to_skip, fh_in, fh_out);
+        else skip(lines_to_skip, fh_in, fh_out);
+        fclose(fh_in);
+      }
+    }
+    else {
       if (from_back) skip_back(lines_to_skip, fh_in, fh_out);
       else skip(lines_to_skip, fh_in, fh_out);
       fclose(fh_in);
     }
-  }
-  else {
-    if (from_back) skip_back(lines_to_skip, fh_in, fh_out);
-    else skip(lines_to_skip, fh_in, fh_out);
-    fclose(fh_in);
   }
 
   fclose(fh_out);
